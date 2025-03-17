@@ -30,6 +30,8 @@ pipeline {
                 echo "File Exists"
              else 
                 echo "File not found"
+                exit 1
+                fi
             '''
                 npm test
             }
