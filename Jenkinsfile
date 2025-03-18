@@ -39,7 +39,16 @@ pipeline {
             }
         }
 
-        stage('Deploy'){
+        
+    }
+
+    post {
+        always {
+            junit 'test-results/junit.xml'
+        }
+    }
+
+    stage('Deploy'){
             agent {
                 docker{
                     image 'node:18-alpine'
@@ -51,11 +60,4 @@ pipeline {
                 netlify --version
             }
         }
-    }
-
-    post {
-        always {
-            junit 'test-results/junit.xml'
-        }
-    }
 }
