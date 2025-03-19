@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        NETLIFY_SITE_ID = 'PUT YOUR NETLIFY SITE ID HERE'
+        NETLIFY_SITE_ID = 'b81e3e1d-f081-410e-a940-a4da898f4275'
         NETLIFY_AUTH_TOKEN = credentials('netlify-token')
     }
 
@@ -50,29 +50,28 @@ pipeline {
                     }
                 }
 
-                stage('E2E') {
+                stage('2 Unit Tests') {
                     agent {
                         docker {
-                            image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
+                            image 'node:18-alpine'
                             reuseNode true
                         }
                     }
 
                     steps {
                         sh '''
-                            npm install serve
-                            node_modules/.bin/serve -s build &
-                            sleep 10
-                            npx playwright test  --reporter=html
+                            #test -f build/index.html
+                            npm test
                         '''
                     }
-
                     post {
                         always {
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Local', reportTitles: '', useWrapperFileDirectly: true])
+                            junit 'jest-results/junit.xml'
                         }
                     }
                 }
+
+                
             }
         }
 
@@ -109,31 +108,6 @@ pipeline {
                     node_modules/.bin/netlify status
                     node_modules/.bin/netlify deploy --dir=build --prod
                 '''
-            }
-        }
-
-        stage('Prod E2E') {
-            agent {
-                docker {
-                    image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
-                    reuseNode true
-                }
-            }
-
-            environment {
-                CI_ENVIRONMENT_URL = 'PUT YOUR NETLIFY SITE URL HERE'
-            }
-
-            steps {
-                sh '''
-                    npx playwright test  --reporter=html
-                '''
-            }
-
-            post {
-                always {
-                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E', reportTitles: '', useWrapperFileDirectly: true])
-                }
             }
         }
     }
