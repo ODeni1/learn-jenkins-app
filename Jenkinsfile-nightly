@@ -3,11 +3,9 @@ pipeline {
 
     stages {
 
-        stage('Docker'){
+        stage('Build docker image'){
             steps {
-                sh '''
-                    docker build -t my-playwright .
-                 '''
+                sh 'docker build -t my-playwright .'
             }
         }
 }
